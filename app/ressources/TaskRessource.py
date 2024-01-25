@@ -3,8 +3,11 @@ from app import db
 from app.models.TaskModel import TaskModel
 from bson import ObjectId
 import json
+from app.docs.ApiDocs import *
+from spectree import  Response
 
 class Task:
+
     def on_get(self, req, resp, id):
         try:
             task_obj = TaskModel.objects(id=id)
@@ -26,6 +29,9 @@ class Task:
 
             resp.context.result = tasks
 
+    @spec.validate(
+        query=Query, resp=Response(HTTP_200=Resp, HTTP_403=BadLuck)
+    )
     def on_post(self, req, resp):
         data = req.context.doc
         title = data['title']
