@@ -1,6 +1,7 @@
 import falcon
 from app import db
 from app.models.TaskModel import TaskModel
+from bson import ObjectId
 import json
 class Task:
     def on_get(self, req, resp):
@@ -25,6 +26,42 @@ class Task:
 
             resp.status = falcon.HTTP_201
             resp.context.result = task_obj.to_mongo()
+
+        except Exception as e:
+            raise falcon.HTTPBadRequest(
+                title='Missing thing',
+                description=str(e),
+            )
+
+    def on_patch(self, req, resp, id):
+        data = req.context.doc
+        title = data['title']
+        body = data["body"]
+
+        try:
+            task_obj = TaskModel(id=id)
+
+            task_obj.title=title
+            task_obj.body=body
+            task_obj.save()
+
+            resp.status = falcon.HTTP_200
+            resp.context.result = task_obj.to_mongo()
+
+        except Exception as e:
+            raise falcon.HTTPBadRequest(
+                title='Missing thing',
+                description=str(e),
+            )
+
+    def on_delete(self, req, resp, id):
+
+        try:
+            task_obj = TaskModel(id=id)
+            task_obj.delete()
+
+            resp.status = falcon.HTTP_200
+            resp.context.result = "Ressource deleted succesfully"
 
         except Exception as e:
             raise falcon.HTTPBadRequest(

@@ -9,9 +9,9 @@ class JSONEncoder(json.JSONEncoder):
         #serializer for ObjectId
         if isinstance(o, ObjectId):
             return str(o)
-            
+
         #serializer for only for datetime object
-        if type(o) == datetime.datetime:
+        if isinstance(o,datetime.datetime):
             return o.strftime("%Y-%m-%d %H:%M:%S") 
         return json.JSONEncoder.default(self, o)
 
