@@ -1,5 +1,16 @@
 import json
 import falcon
+from bson import ObjectId
+import datetime
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        print(type(o))
+        if isinstance(o, ObjectId):
+            return str(o)
+        if type(o) == datetime.datetime:
+            return o.strftime("%Y-%m-%d %H:%M:%S") 
+        return json.JSONEncoder.default(self, o)
 
 class RequireJSON:
     def process_request(self, req, resp):
@@ -51,7 +62,8 @@ class JSONTranslator:
             raise falcon.HTTPBadRequest(title='Malformed JSON', description=description)
 
     def process_response(self, req, resp, resource, req_succeeded):
+        print(resp.context.result)
         if not hasattr(resp.context, 'result'):
             return
 
-        resp.text = json.dumps(resp.context.result)
+        resp.text = json.dumps(resp.context.result, cls=JSONEncoder)
