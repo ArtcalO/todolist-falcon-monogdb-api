@@ -1,7 +1,7 @@
 import falcon
 import mongoengine as mongo
 from app.settings import middleware,dbcfg
-app = falcon.API(middleware=middleware)
+app = falcon.App(middleware=middleware)
 db = mongo.connect(
     'todolist', # This will be the name of your database
     host=dbcfg['host'],
@@ -9,4 +9,5 @@ db = mongo.connect(
 )
 
 from app.ressources.TaskRessource import *
-app.add_route('/tasks/', GetTask)
+task = Task()
+app.add_route('/tasks', task)
