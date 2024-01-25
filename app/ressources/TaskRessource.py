@@ -10,18 +10,24 @@ class Task:
         for obj in tasks_obj:
             tasks.append(obj.to_mongo())
 
-        resp.context.result = tasks[0]
+        resp.context.result = tasks
 
     def on_post(self, req, resp):
         data = req.context.doc
         title = data['title']
         body = data["body"]
 
-        task_obj = TaskModel(
-            title=title, body=body
-        )
+        try:
+            task_obj = TaskModel(
+                title=title, body=body
+            )
+            task_obj.save()
 
-        task_obj.save()
+            resp.status = falcon.HTTP_201
+            resp.context.result = task_obj.to_mongo()
 
-        resp.status = falcon.HTTP_201
-        resp.context.result = task_obj
+        except Exception as e:
+            raise falcon.HTTPBadRequest(
+                title='Missing thing',
+                description=str(e),
+            )
