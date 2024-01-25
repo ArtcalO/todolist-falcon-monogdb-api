@@ -5,9 +5,12 @@ import datetime
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
-        print(type(o))
+
+        #serializer for ObjectId
         if isinstance(o, ObjectId):
             return str(o)
+            
+        #serializer for only for datetime object
         if type(o) == datetime.datetime:
             return o.strftime("%Y-%m-%d %H:%M:%S") 
         return json.JSONEncoder.default(self, o)
@@ -29,17 +32,9 @@ class RequireJSON:
 
 
 class JSONTranslator:
-    # NOTE: Normally you would simply use req.media and resp.media for
-    # this particular use case; this example serves only to illustrate
-    # what is possible.
 
     def process_request(self, req, resp):
-        # req.stream corresponds to the WSGI wsgi.input environ variable,
-        # and allows you to read bytes from the request body.
-        #
-        # See also: PEP 3333
         if req.content_length in (None, 0):
-            # Nothing to do
             return
 
         body = req.stream.read()
@@ -62,7 +57,6 @@ class JSONTranslator:
             raise falcon.HTTPBadRequest(title='Malformed JSON', description=description)
 
     def process_response(self, req, resp, resource, req_succeeded):
-        print(resp.context.result)
         if not hasattr(resp.context, 'result'):
             return
 
