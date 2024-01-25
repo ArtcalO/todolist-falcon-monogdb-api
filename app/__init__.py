@@ -12,3 +12,4 @@ from app.ressources.TaskRessource import *
 task = Task()
 app.add_route('/tasks/{id}', task)
 app.add_route('/tasks', task)
+app.add_route('/tasks', task, suffix='collection')

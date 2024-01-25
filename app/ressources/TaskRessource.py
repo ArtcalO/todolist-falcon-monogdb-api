@@ -3,15 +3,28 @@ from app import db
 from app.models.TaskModel import TaskModel
 from bson import ObjectId
 import json
-class Task:
-    def on_get(self, req, resp):
-        resp.status = falcon.HTTP_200
-        tasks = []
-        tasks_obj = TaskModel.objects
-        for obj in tasks_obj:
-            tasks.append(obj.to_mongo())
 
-        resp.context.result = tasks
+class Task:
+    def on_get(self, req, resp, id):
+        try:
+            task_obj = TaskModel.objects(id=id)
+
+            resp.status = falcon.HTTP_200
+            resp.context.result = task_obj[0].to_mongo()
+        except Exception as e:
+            raise falcon.HTTPBadRequest(
+                title='Ressource with the given id not found',
+                description=str(e),
+            )
+
+    def on_get_collection(self, req, resp):
+            resp.status = falcon.HTTP_200
+            tasks = []
+            tasks_obj = TaskModel.objects
+            for obj in tasks_obj:
+                tasks.append(obj.to_mongo())
+
+            resp.context.result = tasks
 
     def on_post(self, req, resp):
         data = req.context.doc
@@ -29,7 +42,7 @@ class Task:
 
         except Exception as e:
             raise falcon.HTTPBadRequest(
-                title='Missing thing',
+                title='Error occured',
                 description=str(e),
             )
 
@@ -39,7 +52,7 @@ class Task:
         body = data["body"]
 
         try:
-            task_obj = TaskModel(id=id)
+            task_obj = TaskModel.objects(id=id)
 
             task_obj.title=title
             task_obj.body=body
@@ -50,21 +63,21 @@ class Task:
 
         except Exception as e:
             raise falcon.HTTPBadRequest(
-                title='Missing thing',
+                title='Ressource with the given id not found',
                 description=str(e),
             )
 
     def on_delete(self, req, resp, id):
 
         try:
-            task_obj = TaskModel(id=id)
-            task_obj.delete()
+            task_obj = TaskModel.objects(id=id)
+            task_obj[0].delete()
 
             resp.status = falcon.HTTP_200
             resp.context.result = "Ressource deleted succesfully"
 
         except Exception as e:
             raise falcon.HTTPBadRequest(
-                title='Missing thing',
+                title='Ressource with the given id not found',
                 description=str(e),
             )
